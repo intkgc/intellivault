@@ -13,13 +13,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct FileKeywords {
-    name: String,
-    keywords: Vec<String>,
+    pub name: String,
+    pub keywords: Vec<String>,
 }
 
 pub(crate) struct KeywordStore {
-    files: Arc<Mutex<HashMap<String, Arc<Mutex<Vec<i64>>>>>>, // stores keywords by filename
-    db: Mutex<Connection>,
+    pub files: Arc<Mutex<HashMap<String, Arc<Mutex<Vec<i64>>>>>>, // stores keywords by filename
+    pub db: Mutex<Connection>,
 }
 
 impl KeywordStore {
@@ -29,7 +29,9 @@ impl KeywordStore {
                 files: Arc::default(),
                 db: Mutex::new(Connection::open("mkadb.db").unwrap()),
             };
-
+            
+            store.load().await;
+            
             store
                 .db
                 .lock()
@@ -47,7 +49,7 @@ impl KeywordStore {
         })
     }
 
-    fn files_with_extension(dir: &str, extension: &str) -> io::Result<Vec<String>> {
+    pub fn files_with_extension(dir: &str, extension: &str) -> io::Result<Vec<String>> {
         let mut files_with_extension = Vec::new();
 
         for entry in fs::read_dir(dir)? {
@@ -67,7 +69,7 @@ impl KeywordStore {
         Ok(files_with_extension)
     }
 
-    async fn load(&self) {
+    pub async fn load(&self) {
         Self::files_with_extension("./", ".keyboard")
             .unwrap()
             .into_iter()
@@ -95,11 +97,16 @@ impl KeywordStore {
             });
     }
 
-    fn link_keywords(&self, file: &FileKeywords) {
+    pub fn link_keywords(&self, file: &FileKeywords) {
         task::block_on(async {
             let id = self.get_file_id(file.name.as_str());
             file.keywords.iter().for_each(|it| {
                 let mut map = self.files.lock().unwrap();
+                
+                if !map.contains_key(it) {
+                    map.insert(it.to_string(), Arc::default());
+                }
+                
                 let vec = map.get_mut(it).unwrap().clone();
                 vec.lock().unwrap().push(id);
                 let vec = vec.clone();
@@ -125,27 +132,27 @@ impl KeywordStore {
 
     fn store(&self) {}
 
-    fn get_file_id(&self, name: &str) -> i64 {
-        self.db
-            .lock()
-            .unwrap()
-            .execute(
-                "
-        WITH new_file AS (
-            INSERT INTO files (filename) VALUES (?1)
-            ON CONFLICT(filename) DO NOTHING
-            RETURNING id
-        )
-        SELECT id FROM new_file
-        UNION ALL
-        SELECT id FROM files WHERE filename = 'example.txt'
-        LIMIT 1;",
-                params![name],
-            )
-            .unwrap() as i64
+
+    
+    pub fn get_file_id(&self, name: &str) -> i64 {
+        let db = self.db.lock().unwrap();
+        
+        // First, try inserting the file name if it doesn't already exist
+        db.execute(
+            "INSERT INTO files (name) VALUES (?1) ON CONFLICT(name) DO NOTHING;",
+            params![name],
+        ).unwrap();
+    
+        // Then, retrieve the id of the file, whether it was newly inserted or already existed
+        db.query_row(
+            "SELECT id FROM files WHERE name = ?1;",
+            params![name],
+            |row| row.get(0),
+        ).unwrap()
     }
 
-    fn remove_file(&self, name: &str) {
+
+    pub fn remove_file(&self, name: &str) {
         self.db
             .lock()
             .unwrap()

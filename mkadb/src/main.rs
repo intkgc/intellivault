@@ -10,8 +10,8 @@ use rocket::State;
 
 
 #[post("/add_keywords", format = "json", data = "<file_keywords>")]
-async fn add_keywords_to_file(file_keywords: Json<FileKeywords>, mut store: &State<KeywordStore>) {
-    
+async fn add_keywords_to_file(file_keywords: Json<FileKeywords>, store: &State<KeywordStore>) {
+    store.link_keywords(&file_keywords.0)
 }
 
 
