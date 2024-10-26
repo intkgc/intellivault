@@ -21,6 +21,10 @@ export default class MyPlugin extends Plugin {
 		});
 
 
+		const fruits = this.addStatusBarItem();
+    	fruits.createEl('span', { text: '🍎' });
+    	fruits.createEl('span', { text: '🍌' });
+
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
