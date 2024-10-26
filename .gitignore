@@ -20,3 +20,7 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+./mkadb/target
+./mkadb/Cargo.lock
+mkadb/Cargo.lock
+/mkadb/target
