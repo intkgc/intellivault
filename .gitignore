@@ -22,3 +22,5 @@ data.json
 .DS_Store
 ./mkadb/target
 ./mkadb/Cargo.lock
+mkadb/Cargo.lock
+/mkadb/target
