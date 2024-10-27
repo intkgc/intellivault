@@ -42,7 +42,9 @@ impl KeywordStore {
                 "CREATE TABLE IF NOT EXISTS files (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT NOT NULL UNIQUE
-                    )",
+                );
+                CREATE INDEX IF NOT EXISTS idx_name ON files(name);
+                ",
                 [],
             )
             .unwrap();
@@ -159,6 +161,22 @@ impl KeywordStore {
             |row| row.get(0),
         )
         .unwrap()
+    }
+    
+    fn get_files_by_ids(&self, ids: &[i32]) -> Vec<String> {
+        let placeholders: Vec<String> = ids.iter().map(|_| "?".to_string()).collect();
+        let query = format!("SELECT name FROM files WHERE id IN ({})", placeholders.join(", ")).to_string();
+    
+ 
+        let connection = &self.db.lock().unwrap();
+        let mut stmt = connection.prepare(&query).unwrap();
+        let file_iter = stmt.query_map(rusqlite::params_from_iter(ids.iter()), |row| {
+            let name: String = row.get(1)?;
+            Ok(name)
+        }).unwrap();
+    
+ 
+        file_iter.filter(|it| it.is_ok()).map(|it| it.unwrap()).collect()
     }
 
     pub fn remove_file(&self, name: &str) {
