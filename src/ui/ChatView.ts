@@ -45,7 +45,86 @@ export class ChatView extends ItemView {
 			this.messages.forEach((msg) => {
 				const message = messageArea.createDiv({cls: 'intvault-message'});
 				message.addClass(msg.sender === "user" ? "sender-user" : "sender-bot");
-				message.setText(`${msg.sender === "user" ? "Me" : "Obsidian"}: ${msg.text}`);
+				if(msg.sender === "user"){
+					const userIcon = message.createSvg("svg", {
+						attr: {
+							xmlns: "http://www.w3.org/2000/svg",
+							width: "24",
+							height: "24",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							"stroke-width": "2",
+							"stroke-linecap": "round",
+							"stroke-linejoin": "round"
+						}
+					});
+					userIcon.createSvg("circle", {
+						attr: {
+							cx: "12",
+							cy:"8",
+							r:"5"
+						}
+					})
+					userIcon.createSvg("path", {
+						attr: {
+							d: "M20 21a8 8 0 0 0-16 0"
+						}
+					});
+				} else if (msg.sender === "bot") {
+					const botIcon = message.createSvg("svg", {
+						attr: {
+							xmlns: "http://www.w3.org/2000/svg",
+							width: "24",
+							height: "24",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							"stroke-width": "2",
+							"stroke-linecap": "round",
+							"stroke-linejoin": "round"
+						}
+					});
+					botIcon.createSvg("path", {
+						attr: {
+							d: "M12 8V4H8"
+						}
+					})
+					botIcon.createSvg("rect", {
+						attr: {
+							width:"16",
+							height:"12",
+							x:"4",
+							y:"8",
+							rx:"2"
+						}
+					});
+					botIcon.createSvg("path", {
+						attr: {
+							d: "M2 14h2"
+						}
+					})
+					botIcon.createSvg("path", {
+						attr: {
+							d: "M20 14h2"
+						}
+					})
+					botIcon.createSvg("path", {
+						attr: {
+							d: "M15 13v2"
+						}
+					})
+					botIcon.createSvg("path", {
+						attr: {
+							d: "M9 13v2"
+						}
+					})
+					
+				}
+				const text = message.createDiv();
+				text.setText(`${msg.text}`);
+				//<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+				//<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
 			});
 		};
 
