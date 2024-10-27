@@ -6,9 +6,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use async_std::task;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
+use tokio::runtime;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct FileKeywords {
@@ -23,15 +23,17 @@ pub(crate) struct KeywordStore {
 
 impl KeywordStore {
     pub fn new() -> Self {
+        let rt = runtime::Runtime::new().unwrap();
         let store = KeywordStore {
             files: Arc::default(),
             db: Mutex::new(Connection::open("mkadb.db").unwrap()),
         };
 
-        task::block_on(async {
+        //let store = Arc::new(store);
+        rt.block_on(async {
             store.load().await;
         });
-        
+
         store
             .db
             .lock()
@@ -74,7 +76,7 @@ impl KeywordStore {
             .into_iter()
             .for_each(|name| {
                 let keywords = self.files.clone();
-                task::spawn(async move {
+                tokio::spawn(async move {
                     let mut file = File::open(name.as_str()).unwrap();
                     let mut buffer = Vec::new();
 
@@ -106,37 +108,36 @@ impl KeywordStore {
             None => file_name.to_string(),
         }
     }
-    pub fn link_keywords(&self, file: &FileKeywords) {
-        task::block_on(async {
-            let id = self.get_file_id(file.name.as_str());
-            file.keywords.iter().for_each(|it| {
-                let mut map = self.files.lock().unwrap();
+    pub async fn link_keywords(&self, file: &FileKeywords) {
+        let id = self.get_file_id(file.name.as_str());
 
-                if !map.contains_key(it) {
-                    map.insert(it.to_string(), Arc::default());
-                }
+        file.keywords.iter().for_each(|it| {
+            let mut map = self.files.lock().unwrap();
 
-                let vec = map.get_mut(it).unwrap().clone();
-                vec.lock().unwrap().push(id);
-                let vec = vec.clone();
-                let name = it.to_string();
+            if !map.contains_key(it) {
+                map.insert(it.to_string(), Arc::default());
+            }
 
-                task::spawn(async move {
-                    let mut vec = vec.lock().unwrap();
-                    vec.sort();
-                    let mut file = File::create(format!("{}.keyword", name)).unwrap();
-                    let byte_slice: &[u8] = unsafe {
-                        std::slice::from_raw_parts(
-                            vec.as_ptr() as *const u8,
-                            vec.len() * mem::size_of::<i64>(),
-                        )
-                    };
+            let vec = map.get_mut(it).unwrap().clone();
+            vec.lock().unwrap().push(id);
+            let vec = vec.clone();
+            let name = it.to_string();
 
-                    file.write_all(byte_slice).unwrap();
-                });
+            tokio::spawn(async move {
+                let mut vec = vec.lock().unwrap();
+                vec.sort();
+                let mut file = File::create(format!("{}.keyword", name)).unwrap();
+                let byte_slice: &[u8] = unsafe {
+                    std::slice::from_raw_parts(
+                        vec.as_ptr() as *const u8,
+                        vec.len() * mem::size_of::<i64>(),
+                    )
+                };
+
+                file.write_all(byte_slice).unwrap();
             });
-            self.store();
         });
+        self.store();
     }
 
     fn store(&self) {}
