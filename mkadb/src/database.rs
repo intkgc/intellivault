@@ -1,13 +1,12 @@
 use std::{
     collections::HashMap,
     fs::{self, File},
-    io::{self, Write},
+    io::{self, Read, Write},
     mem,
     sync::{Arc, Mutex},
 };
 
 use async_std::task;
-use memmap2::Mmap;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 
@@ -24,29 +23,29 @@ pub(crate) struct KeywordStore {
 
 impl KeywordStore {
     pub fn new() -> Self {
+        let store = KeywordStore {
+            files: Arc::default(),
+            db: Mutex::new(Connection::open("mkadb.db").unwrap()),
+        };
+
         task::block_on(async {
-            let store = KeywordStore {
-                files: Arc::default(),
-                db: Mutex::new(Connection::open("mkadb.db").unwrap()),
-            };
-            
             store.load().await;
-            
-            store
-                .db
-                .lock()
-                .unwrap()
-                .execute(
-                    "CREATE TABLE IF NOT EXISTS files (
+        });
+        
+        store
+            .db
+            .lock()
+            .unwrap()
+            .execute(
+                "CREATE TABLE IF NOT EXISTS files (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT NOT NULL UNIQUE
                     )",
-                    [],
-                )
-                .unwrap();
+                [],
+            )
+            .unwrap();
 
-            store
-        })
+        store
     }
 
     pub fn files_with_extension(dir: &str, extension: &str) -> io::Result<Vec<String>> {
@@ -76,37 +75,47 @@ impl KeywordStore {
             .for_each(|name| {
                 let keywords = self.files.clone();
                 task::spawn(async move {
-                    let file = File::open(name.as_str()).unwrap();
-                    let mmap = unsafe { Mmap::map(&file).unwrap() };
-                    if mmap.len() % mem::size_of::<i64>() != 0 {
-                        panic!("")
+                    let mut file = File::open(name.as_str()).unwrap();
+                    let mut buffer = Vec::new();
+
+                    file.read_to_end(&mut buffer).unwrap();
+
+                    if buffer.len() % 8 != 0 {
+                        eprintln!("Error: corrupted file '{}'", name);
+                        return;
                     }
 
-                    let len = mmap.len() / mem::size_of::<i64>();
+                    let ptr = buffer.as_mut_ptr() as *mut i64;
+                    let len = buffer.len() / 8;
+                    let capacity = buffer.capacity() / 8;
+                    std::mem::forget(buffer);
 
-                    let vec: Vec<i64> = unsafe {
-                        std::slice::from_raw_parts(mmap.as_ptr() as *const i64, len).to_vec()
-                    };
+                    let vec: Vec<i64> = unsafe { Vec::from_raw_parts(ptr, len, capacity) };
 
-                    keywords
-                        .lock()
-                        .unwrap()
-                        .insert(name, Arc::new(Mutex::new(vec)))
-                        .unwrap()
+                    keywords.lock().unwrap().insert(
+                        Self::remove_extension(name.as_str()),
+                        Arc::new(Mutex::new(vec)),
+                    );
                 });
             });
     }
 
+    fn remove_extension(file_name: &str) -> String {
+        match file_name.rfind('.') {
+            Some(pos) => file_name[..pos].to_string(),
+            None => file_name.to_string(),
+        }
+    }
     pub fn link_keywords(&self, file: &FileKeywords) {
         task::block_on(async {
             let id = self.get_file_id(file.name.as_str());
             file.keywords.iter().for_each(|it| {
                 let mut map = self.files.lock().unwrap();
-                
+
                 if !map.contains_key(it) {
                     map.insert(it.to_string(), Arc::default());
                 }
-                
+
                 let vec = map.get_mut(it).unwrap().clone();
                 vec.lock().unwrap().push(id);
                 let vec = vec.clone();
@@ -132,25 +141,24 @@ impl KeywordStore {
 
     fn store(&self) {}
 
-
-    
     pub fn get_file_id(&self, name: &str) -> i64 {
         let db = self.db.lock().unwrap();
-        
+
         // First, try inserting the file name if it doesn't already exist
         db.execute(
             "INSERT INTO files (name) VALUES (?1) ON CONFLICT(name) DO NOTHING;",
             params![name],
-        ).unwrap();
-    
+        )
+        .unwrap();
+
         // Then, retrieve the id of the file, whether it was newly inserted or already existed
         db.query_row(
             "SELECT id FROM files WHERE name = ?1;",
             params![name],
             |row| row.get(0),
-        ).unwrap()
+        )
+        .unwrap()
     }
-
 
     pub fn remove_file(&self, name: &str) {
         self.db
