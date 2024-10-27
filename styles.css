@@ -1,8 +1,58 @@
-/*
+.intvault-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 90%;
+}
+.intvault-message-area {
+    min-height: 0;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+.intvault-input-area {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.intvault-message {
+    border-radius: 5px;
+    padding: 8px;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+}
 
-If your plugin does not need CSS, delete this file.
+.intvault-message svg {
+    margin-right: 8px;
+}
 
-*/
+.intvault-message.sender-user {
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    border: 1px solid var(--background-modifier-border);
+}
+.intvault-message.sender-bot {
+    background-color: var(--background-secondary);
+    color: var(--text-normal);
+    border: 1px solid var(--background-modifier-border);
+}
+.intvault-chat-input {
+    flex-grow: 1;
+    min-width: 0;
+    padding: 10px;
+    margin: 0;
+    border: 1px solid #ccc;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.intvault-send-button {
+    background: none;
+    border: none;
+    height: 40px;
+    padding: 0 10px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+}
+
