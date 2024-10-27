@@ -121,10 +121,8 @@ export class ChatView extends ItemView {
 					})
 					
 				}
-				const text = message.createDiv();
+				const text = message.createDiv({cls: "intvault-message-content"});
 				text.setText(`${msg.text}`);
-				//<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-				//<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
 			});
 		};
 
@@ -133,7 +131,17 @@ export class ChatView extends ItemView {
 			updateMessages();
 		};
 
-		const input = inputArea.createEl("input", { type: "text", placeholder: "Prompt", cls: "intvault-chat-input" });
+		const input = inputArea.createEl("textarea", {type: "text", placeholder: "Prompt", cls: "intvault-chat-input" });
+		input.addEventListener('input', () => {
+			input.style.height = 'auto';
+			input.style.height = `${input.scrollHeight}px`;
+			if (input.scrollHeight > 240) {
+				input.style.height = '240px'; // 240 - это максимум для 10 строк
+				input.style.overflowY = 'auto'; // Включаем прокрутку, если текст превышает максимум
+			} else {
+				input.style.overflowY = 'hidden'; // Убираем прокрутку, если текст в пределах максимума
+			}
+		});
 		const sendButton = inputArea.createEl("button", {cls: "intvault-send-button"});
         
         const svg = sendButton.createSvg("svg", {
@@ -167,7 +175,7 @@ export class ChatView extends ItemView {
             if (userInput) {
                 addMessage("user", userInput);
                 input.value = "";
-
+				input.style.height = "auto";
                 addMessage("bot", "Это фиксированный ответ от бота.");
             }
         };
