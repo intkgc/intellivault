@@ -1,9 +1,12 @@
-pub mod database;
+mod database;
+mod matcher;
+
 
 #[macro_use]
 extern crate rocket;
 
 use database::{FileKeywords, KeywordStore};
+use matcher::KeywordsMatcher;
 use rocket::{form::FromFormField, serde::json::Json};
 use rocket::State;
 
@@ -11,7 +14,7 @@ use rocket::State;
 
 #[post("/add_keywords", format = "json", data = "<file_keywords>")]
 async fn add_keywords_to_file(file_keywords: Json<FileKeywords>, store: &State<KeywordStore>) {
-    store.link_keywords(&file_keywords.0).await
+    store.link_keywords_to_file(&file_keywords.0).await
 }
 
 
@@ -21,8 +24,8 @@ fn get_keywords_by_file(name: String, store: &State<KeywordStore>) -> Json<Vec<S
 }
 
 #[get("/get_files_by_keywords?<keywords..>")]
-fn get_files_by_keywords(keywords: Vec<String>, store: &State<KeywordStore>) -> Json<Vec<String>> {
-    Json::default().unwrap()
+fn get_files_by_keywords(keywords: KeywordsMatcher, store: &State<KeywordStore>) -> Json<Vec<String>> {
+    store.get_files_by_ids(&store.get_files_ids_by_keywords(keywords.rules, keywords.keywords)).into()
 }
 
 #[launch]
