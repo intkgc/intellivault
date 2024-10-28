@@ -15,7 +15,7 @@ export class ChatView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Obsidian Assistent";
+		return "Obsidian Assistant";
 	}
     getIcon(): IconName {   
         return "bot-message-square";
@@ -35,7 +35,7 @@ export class ChatView extends ItemView {
 		container.empty();
         container.addClass("intvault-chat-container")
 
-		const title = container.createEl("h2", { cls: 'intvault-title', text: "Obsidian AI Assistent" },);
+		const title = container.createEl("h2", { cls: 'intvault-title', text: "Obsidian AI Assistant" },);
 
 		const messageArea = container.createDiv({cls: 'intvault-message-area'});
         const inputArea = container.createDiv({cls: 'intvault-input-area'});
