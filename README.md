@@ -10,4 +10,6 @@ You only need a paid [OpanAI-API Token](https://platform.openai.com/) and this w
 
 MKADb (aka. Mutli-Keyword Assiative Database, aka. Mega Keyword Awesome Database, aka. есть ли жизнь за МКАДом?) 
 
-Is best lib ever, which allows you to store notes by keywords.
+Is best database ever, which allows you to store notes by keywords.
+
+This db is written in rust, what makes it so ⚡️ blazing fast 🚀
