@@ -1,7 +1,8 @@
-import { Plugin, WorkspaceLeaf, ItemView } from "obsidian";
+import { Plugin, WorkspaceLeaf, ItemView, PluginSettingTab } from "obsidian";
 import { addCommands } from "./commands";
 import { ChatView } from "./ui/ChatView"
 import { SettingTab } from './ui/SettingTab';
+import {OpenAIGenerator} from './openai'
 const VIEW_TYPE_CHAT = "chat-view";
 
 
@@ -15,10 +16,11 @@ const DEFAULT_SETTINGS: Partial<PluginSettings> = {
 
 export default class ChatPlugin extends Plugin {
 	settings: PluginSettings;
-	
+	openaigenerator: OpenAIGenerator
 	async onload() {
 		await this.loadSettings();
-		this.registerView(VIEW_TYPE_CHAT, (leaf) => new ChatView(leaf));
+		this.openaigenerator = new OpenAIGenerator(this.settings.chatgpt_api_key);
+		this.registerView(VIEW_TYPE_CHAT, (leaf) => new ChatView(leaf, this));
 		this.addSettingTab(new SettingTab(this.app, this));
 		addCommands(this);
 	}

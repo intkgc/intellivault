@@ -1,13 +1,15 @@
-import { WorkspaceLeaf, ItemView, IconName, addIcon, setIcon } from "obsidian";
+import { WorkspaceLeaf, ItemView, IconName, addIcon, setIcon, Plugin } from "obsidian";
 import { compileFunction } from "vm";
+import ChatPlugin from '../main';
 
 const VIEW_TYPE_CHAT = "chat-view";
 
 export class ChatView extends ItemView {
 	messages: { sender: string; text: string }[] = [];
-
-	constructor(leaf: WorkspaceLeaf) {
+	private plugin: ChatPlugin;
+	constructor(leaf: WorkspaceLeaf, plugin: ChatPlugin) {
 		super(leaf);
+		this.plugin = plugin;
 		this.buildUI();
 	}
 
@@ -84,7 +86,11 @@ export class ChatView extends ItemView {
                 addMessage("user", userInput);
                 input.value = "";
 				input.style.height = "auto";
-                addMessage("bot", "Это фиксированный ответ от бота.");
+                this.plugin.openaigenerator.getMsg(userInput).then(response => {
+					addMessage("bot", response);
+				}).catch(error => {
+					console.error(error);
+				});;
             }
         };
 
