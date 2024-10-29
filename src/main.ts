@@ -1,12 +1,25 @@
 import { Plugin, WorkspaceLeaf, ItemView } from "obsidian";
 import { addCommands } from "./commands";
 import { ChatView } from "./ui/ChatView"
+import { SettingTab } from './ui/SettingTab';
 const VIEW_TYPE_CHAT = "chat-view";
 
-export default class ChatPlugin extends Plugin {
-	async onload() {
-		this.registerView(VIEW_TYPE_CHAT, (leaf) => new ChatView(leaf));
 
+interface PluginSettings {
+  chatgpt_api_key: string;
+}
+
+const DEFAULT_SETTINGS: Partial<PluginSettings> = {
+	chatgpt_api_key: '',
+};
+
+export default class ChatPlugin extends Plugin {
+	settings: PluginSettings;
+	
+	async onload() {
+		await this.loadSettings();
+		this.registerView(VIEW_TYPE_CHAT, (leaf) => new ChatView(leaf));
+		this.addSettingTab(new SettingTab(this.app, this));
 		addCommands(this);
 	}
 
@@ -19,5 +32,13 @@ export default class ChatPlugin extends Plugin {
 		const leaf = this.app.workspace.getRightLeaf(false);
 		await leaf.setViewState({ type: VIEW_TYPE_CHAT });
 		this.app.workspace.revealLeaf(leaf);
+	}
+	
+	async loadSettings() {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	}
+
+	async saveSettings() {
+		await this.saveData(this.settings);
 	}
 }
