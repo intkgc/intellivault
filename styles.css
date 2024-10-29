@@ -4,6 +4,7 @@
 }
 .intvault-message-area {
     min-height: 0;
+    height:max-content;
     overflow-y: auto;
     flex-grow: 1;
 }
@@ -13,10 +14,7 @@
     margin-top: auto;
     background-color: var(--background-modifier-form-field);
     border-radius: 10px;
-}
-
-.intvault-send-button svg {
-    margin: 8px;
+    margin-top: var(--size-4-8);
 }
 
 .intvault-message {
@@ -25,8 +23,10 @@
     margin: 5px 0;
     display: flex;
     align-items: flex-start;
+    justify-content: space-around;
     position: relative;
     overflow: hidden;
+    --icon-size: var(--icon-size-m);
 }
 
 .intvault-message-content  {
@@ -39,11 +39,6 @@
     line-height: 1.5;
 }
 
-.intvault-message svg {
-    margin-right: 8px;
-    flex-shrink: 0;
-}
-
 .intvault-message.sender-user {
     background-color: var(--background-primary);
     color: var(--text-normal);
@@ -54,9 +49,9 @@
     color: var(--text-normal);
     border: 1px solid var(--background-modifier-border);
 }
+
 .intvault-chat-input {
     flex-grow: 1;
-    min-width: 0;
     margin: 0;
     resize: none;
     height: auto;
@@ -64,10 +59,16 @@
     box-shadow:none;
     padding: 10px;
     background-color: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    overflow-y: auto;
+    align-self: center;
 }
 
 .intvault-chat-input:focus {
-    box-shadow:none;
+    outline: none;
+    box-shadow: none;
 }
 
 .intvault-send-button {
@@ -78,6 +79,7 @@
     display: flex;
     align-items: center;
     box-shadow: none !important;
+    --icon-size: var(--icon-size-m);
 } 
 .intvault-send-button:not(.clickable-icon) {
     background-color: transparent; 
@@ -87,3 +89,9 @@
 .intvault-send-button:hover {   
     color: var(--interactive-accent-hover);
 }
+
+/*.intvault-textarea-container {
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}*/
