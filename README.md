@@ -12,4 +12,4 @@ MKADb (aka. Mutli-Keyword Assiative Database, aka. Mega Keyword Awesome Database
 
 Is best database ever, which allows you to store notes by keywords.
 
-This db is written in rust, what makes it so ⚡️ blazing fast 🚀
+This db is written in rust, what makes it so ⚡️ blazing fast 🚀🧬🚞🌪️
