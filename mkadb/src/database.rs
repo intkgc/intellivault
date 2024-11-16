@@ -43,7 +43,7 @@ impl KeywordStore {
             .execute(
                 "CREATE TABLE IF NOT EXISTS files (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT NOT NULL UNIQUE
+                        name TEXT NOT NULL UNIQUE,
                         keywords TEXT
                 );
                 CREATE INDEX IF NOT EXISTS idx_name ON files(name);
@@ -61,14 +61,9 @@ impl KeywordStore {
         for entry in fs::read_dir(dir)? {
             let entry = entry?;
             let path = entry.path();
-            if path.is_file() {
-                if let Some(ext) = path.extension() {
-                    if ext == extension {
-                        if let Some(file_name) = path.to_str() {
-                            files_with_extension.push(file_name.to_string());
-                        }
-                    }
-                }
+
+            if path.is_file() && path.to_str().unwrap().ends_with(extension) {
+                files_with_extension.push(path.to_str().unwrap().to_string());
             }
         }
 
@@ -76,11 +71,14 @@ impl KeywordStore {
     }
 
     pub async fn load(&self) {
-        Self::files_with_extension("./", ".keyboard")
+        Self::files_with_extension("./", ".keyword")
             .unwrap()
             .into_iter()
+            .map(|it| it.strip_prefix("./").unwrap_or("").to_string())
+            .filter(|it| !it.is_empty())
             .for_each(|name| {
                 let keywords = self.files.clone();
+                println!("{}", name);
                 tokio::spawn(async move {
                     let mut file = File::open(name.as_str()).unwrap();
                     let mut buffer = Vec::new();
@@ -171,9 +169,13 @@ impl KeywordStore {
                 params![id],
                 |row| row.get(0),
             )
-            .unwrap();
+            .unwrap_or(String::new());
 
-        string.split(";").map(|it| it.to_string()).collect()
+        string
+            .split(";")
+            .map(|it| it.to_string())
+            .filter(|it| !it.is_empty())
+            .collect()
     }
 
     pub fn add_file_if_not_exist(&self, name: &str) {
@@ -209,7 +211,7 @@ impl KeywordStore {
         let mut stmt = connection.prepare(&query).unwrap();
         let file_iter = stmt
             .query_map(rusqlite::params_from_iter(ids.iter()), |row| {
-                let name: String = row.get(1)?;
+                let name: String = row.get(0)?;
                 Ok(name)
             })
             .unwrap();
@@ -220,7 +222,11 @@ impl KeywordStore {
             .collect()
     }
 
-    pub fn get_files_ids_by_keywords(&self, rules: MatcherRules, keywords: Vec<String>) -> Vec<FileID> {
+    pub fn get_files_ids_by_keywords(
+        &self,
+        rules: MatcherRules,
+        keywords: Vec<String>,
+    ) -> Vec<FileID> {
         let locked_keywords = self.files.read().unwrap();
         let keywords: Vec<_> = keywords
             .iter()
@@ -228,14 +234,32 @@ impl KeywordStore {
             .filter(|it| it.is_some())
             .map(|it| unsafe { it.unwrap_unchecked().clone() })
             .collect();
-        Matcher::new(rules, keywords).find_matches()
+        
+         let a = Matcher::new(rules, keywords).find_matches();
+         println!("{:?}", a);
+         a
+    }
+
+    pub fn remove_keywords(&self, id: FileID, keywords: &Vec<String>) {
+        keywords.iter().for_each(|it| {
+            let hash_map = self.files.read().unwrap();
+            let keyword_vec = hash_map.get(it).unwrap();
+            let position = keyword_vec.read().unwrap().binary_search(&id).unwrap();
+
+            keyword_vec.write().unwrap().remove(position);
+        });
     }
 
     pub fn remove_file(&self, name: &str) {
+        let id = self.get_file_id(name).unwrap();
+        let keywords = self.get_file_keywords(id);
+
+        self.remove_keywords(id, &keywords);
+
         self.db
             .lock()
             .unwrap()
-            .execute("DELETE FROM files WHERE name = ?", params![name])
+            .execute("DELETE FROM files WHERE id = ?", params![id])
             .unwrap();
     }
 }

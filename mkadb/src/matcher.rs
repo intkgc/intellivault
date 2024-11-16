@@ -43,6 +43,7 @@ impl Matcher {
 
         let mut indeces: Vec<i32> = vec![0; keywords.len()];
 
+        
         let mut previous = -1;
         let mut repeatitions = 1;
 
@@ -90,7 +91,10 @@ impl Matcher {
                 if (repeatitions >= self.rules.minimum_threshold)
                     && (previous != value.1 || is_last_vec)
                 {
-                    files.push((repeatitions, previous));
+                    if previous != - 1 {
+                        files.push((repeatitions, previous));
+                    }
+                    
                     repeatitions = 1;
                 }
                 previous = value.1;
@@ -99,8 +103,9 @@ impl Matcher {
             }
         }
 
+        
         let count = self.rules.take_first as usize;
-
+        
         match self.rules.sorting_type {
             SortingType::Downgrade => {
                 files.sort_by(|x, y| y.0.cmp(&x.0));
@@ -114,8 +119,8 @@ impl Matcher {
                 let mut rng = rand::thread_rng();
                 files
                     .choose_multiple(&mut rng, count)
-                    .map(|i| i.1)
-                    .collect()
+                    .map(|i| i.1).collect()
+                    
             }
         }
     }
@@ -130,10 +135,10 @@ mod tests {
         let rules = MatcherRules {
             take_first: 2,
             sorting_type: SortingType::Downgrade,
-            minimum_threshold: 2,
+            minimum_threshold: 1,
         };
 
-        let keywords = vec![vec![1, 2, 3, 4], vec![2, 3, 5], vec![5, 7, 8]];
+        let keywords = vec![vec![1, 2, 3, 4, 353, 3434, 3434, 3434, 2335, 533 ,23435 ,532]];
 
         let keywords: Vec<Arc<RwLock<Vec<i64>>>> = keywords
             .into_iter()
@@ -142,7 +147,7 @@ mod tests {
 
         let mut files = Matcher::new(rules, keywords).find_matches();
         files.sort();
-
+        println!("{:?}", files);
         assert!(files == vec![2, 3], "files = {:?}", files)
     }
 }
