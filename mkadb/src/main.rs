@@ -7,7 +7,7 @@ extern crate rocket;
 
 use database::{FileKeywords, KeywordStore};
 use matcher::KeywordsMatcher;
-use rocket::{form::FromFormField, serde::json::Json};
+use rocket::serde::json::Json;
 use rocket::State;
 
 
@@ -20,7 +20,12 @@ async fn add_keywords_to_file(file_keywords: Json<FileKeywords>, store: &State<K
 
 #[get("/get_keywords/<name>")]
 fn get_keywords_by_file(name: String, store: &State<KeywordStore>) -> Json<Vec<String>> {
-    Json::default().unwrap()
+    store.get_file_keywords(store.get_file_id(name.as_str()).unwrap()).into()
+}
+
+#[post("/remove_file/<name>")]
+fn remove_file(name: String, store: &State<KeywordStore>) {
+    store.remove_file(name.as_str());
 }
 
 #[get("/get_files_by_keywords?<keywords..>")]
@@ -32,5 +37,5 @@ fn get_files_by_keywords(keywords: KeywordsMatcher, store: &State<KeywordStore>)
 fn rocket() -> _ {
     rocket::build()
         .manage(KeywordStore::new())
-        .mount("/", routes![add_keywords_to_file, get_keywords_by_file, get_files_by_keywords])
+        .mount("/", routes![add_keywords_to_file, get_keywords_by_file, get_files_by_keywords, remove_file])
 }

@@ -43,7 +43,7 @@ impl KeywordStore {
             .execute(
                 "CREATE TABLE IF NOT EXISTS files (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT NOT NULL UNIQUE
+                        name TEXT NOT NULL UNIQUE,
                         keywords TEXT
                 );
                 CREATE INDEX IF NOT EXISTS idx_name ON files(name);
@@ -171,9 +171,9 @@ impl KeywordStore {
                 params![id],
                 |row| row.get(0),
             )
-            .unwrap();
+            .unwrap_or(String::new());
 
-        string.split(";").map(|it| it.to_string()).collect()
+        string.split(";").map(|it| it.to_string()).filter(|it| !it.is_empty()).collect()
     }
 
     pub fn add_file_if_not_exist(&self, name: &str) {
@@ -231,11 +231,27 @@ impl KeywordStore {
         Matcher::new(rules, keywords).find_matches()
     }
 
+    pub fn remove_keywords(&self, id: FileID, keywords: &Vec<String>) {
+        keywords.iter().for_each(|it| {
+            
+            let hash_map = self.files.read().unwrap();
+            let keyword_vec = hash_map.get(it).unwrap();
+            let position = keyword_vec.read().unwrap().binary_search(&id).unwrap();
+            
+            keyword_vec.write().unwrap().remove(position);
+        });
+    }
+    
     pub fn remove_file(&self, name: &str) {
+        let id = self.get_file_id(name).unwrap();
+        let keywords = self.get_file_keywords(id);
+        
+        self.remove_keywords(id, &keywords);
+        
         self.db
             .lock()
             .unwrap()
-            .execute("DELETE FROM files WHERE name = ?", params![name])
+            .execute("DELETE FROM files WHERE id = ?", params![id])
             .unwrap();
     }
 }
