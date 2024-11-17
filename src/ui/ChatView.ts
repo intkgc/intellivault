@@ -1,15 +1,22 @@
 import { WorkspaceLeaf, ItemView, IconName, addIcon, setIcon, Plugin } from "obsidian";
 import { compileFunction } from "vm";
 import ChatPlugin from '../main';
+import OpenAI from "openai"; 
+import { APIPromise } from "openai/core";
+import { Stream } from "openai/streaming";
+import { ChatCompletionChunk } from "openai/resources";
+import { OpenAIGenerator } from "src/openai";
 
 const VIEW_TYPE_CHAT = "chat-view";
 
 export class ChatView extends ItemView {
-	messages: { sender: string; text: string }[] = [];
 	private plugin: ChatPlugin;
+	openaigenerator: OpenAIGenerator;
+
 	constructor(leaf: WorkspaceLeaf, plugin: ChatPlugin) {
 		super(leaf);
 		this.plugin = plugin;
+		this.openaigenerator = new OpenAIGenerator(this.plugin.settings.chatgpt_api_key);
 		this.buildUI();
 	}
 
@@ -43,25 +50,31 @@ export class ChatView extends ItemView {
 		const messageArea = container.createDiv({cls: 'intvault-message-area'});
         const inputArea = container.createDiv({cls: 'intvault-input-area'});
 
-		const updateMessages = () => {
-			messageArea.empty();
-			this.messages.forEach((msg) => {
+		const updateMessages = async (sender: string, text: APIPromise<Stream<ChatCompletionChunk>> | string) => {
 				const message = messageArea.createDiv({cls: 'intvault-message'});
-				message.addClass(msg.sender === "user" ? "sender-user" : "sender-bot");
+				message.addClass(sender === "user" ? "sender-user" : "sender-bot");
 				
-				if(msg.sender === "user"){
+				
+				if(sender === "user"){
 					setIcon(message, "user-round")
-				} else if (msg.sender === "bot") {
+				} else if (sender === "bot") {
 					setIcon(message, "bot");
 				}
-				const text = message.createDiv({cls: "intvault-message-content"});
-				text.setText(`${msg.text}`);
-			});
+				
+				const textView = message.createDiv({cls: "intvault-message-content"});
+				
+				if(sender === "bot"){
+					for await (const chunk of text) {
+						textView.setText(textView.getText() + (chunk.choices[0]?.delta?.content || ""));
+					}
+					this.openaigenerator.addToMessages({role:"assistant", content: textView.getText()})
+				} else {
+					textView.setText(text); 
+				}
 		};
 
-		const addMessage = (sender: string, text: string) => {
-			this.messages.push({ sender, text });
-			updateMessages();
+		const addMessage = (sender: string, text: APIPromise<Stream<ChatCompletionChunk>> | string) => {
+			updateMessages(sender, text);
 		};
 		const textAreaContainer = inputArea.createDiv({cls: "intvault-textarea-container"})
 
@@ -81,12 +94,12 @@ export class ChatView extends ItemView {
        setIcon(sendButton, "send-horizontal");
 
         sendButton.onclick = () => {
-            const userInput = input.value.trim();
+            const userInput = input.value.trim();	
             if (userInput) {
                 addMessage("user", userInput);
                 input.value = "";
 				input.style.height = "auto";
-                this.plugin.openaigenerator.getMsg(userInput).then(response => {
+                this.openaigenerator.getMsg(userInput).then(response => {
 					addMessage("bot", response);
 				}).catch(error => {
 					console.error(error);
@@ -100,3 +113,6 @@ export class ChatView extends ItemView {
 		inputArea.appendChild(sendButton);
 	}
 }
+
+
+
