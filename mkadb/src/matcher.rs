@@ -16,7 +16,7 @@ pub enum SortingType {
 #[derive(Deserialize, Serialize, FromForm)]
 pub struct KeywordsMatcher {
     pub keywords: Vec<String>,
-    pub rules: MatcherRules
+    pub rules: MatcherRules,
 }
 
 #[derive(Deserialize, Serialize, FromForm)]
@@ -36,6 +36,28 @@ impl Matcher {
         Self { rules, keywords }
     }
 
+    fn select(rules: &MatcherRules, mut files: Vec<(i32, i64)>) -> Vec<i64> {
+        let count = rules.take_first as usize;
+
+        
+        match rules.sorting_type {
+            SortingType::Downgrade => {
+                files.sort_by(|x, y| y.0.cmp(&x.0));
+                files.iter().map(|i| i.1).take(count).collect()
+            }
+            SortingType::Upgrade => {
+                files.sort_by_key(|it| it.0);
+                files.iter().map(|i| i.1).take(count).collect()
+            }
+            SortingType::Random => {
+                let mut rng = rand::thread_rng();
+                files
+                    .choose_multiple(&mut rng, count)
+                    .map(|i| i.1)
+                    .collect()
+            }
+        }
+    }
     pub(crate) fn find_matches(self) -> Vec<i64> {
         let mut files: Vec<(i32, i64)> = vec![];
 
@@ -43,11 +65,27 @@ impl Matcher {
 
         let mut indeces: Vec<i32> = vec![0; keywords.len()];
 
-        
         let mut previous = -1;
         let mut repeatitions = 1;
 
         let mut is_last_vec = false;
+        if keywords.len() == 1 && self.rules.minimum_threshold <= 1 {
+            return match self.rules.sorting_type {
+                SortingType::Downgrade | SortingType::Upgrade => keywords[0]
+                    .iter()
+                    .map(|it| *it)
+                    .take(self.rules.take_first as usize)
+                    .collect(),
+                SortingType::Random => {
+                    let mut rng = rand::thread_rng();
+                    keywords[0]
+                        .choose_multiple(&mut rng, self.rules.take_first as usize)
+                        .map(|it| *it)
+                        .collect()
+                }
+            };
+        }
+
         loop {
             if indeces
                 .iter()
@@ -81,7 +119,6 @@ impl Matcher {
                 .filter(|it| it.1 != MAX)
                 .min_by(|x, y| x.1.cmp(&y.1));
 
-
             if let Some(value) = min {
                 indeces[value.0] += 1;
 
@@ -91,10 +128,13 @@ impl Matcher {
                 if (repeatitions >= self.rules.minimum_threshold)
                     && (previous != value.1 || is_last_vec)
                 {
-                    if previous != - 1 {
+                    if previous != -1 {
                         files.push((repeatitions, previous));
                     }
+
                     
+                }
+                if previous != value.1 {
                     repeatitions = 1;
                 }
                 previous = value.1;
@@ -103,26 +143,7 @@ impl Matcher {
             }
         }
 
-        
-        let count = self.rules.take_first as usize;
-        
-        match self.rules.sorting_type {
-            SortingType::Downgrade => {
-                files.sort_by(|x, y| y.0.cmp(&x.0));
-                files.iter().map(|i| i.1).take(count).collect()
-            }
-            SortingType::Upgrade => {
-                files.sort_by_key(|it| it.0);
-                files.iter().map(|i| i.1).take(count).collect()
-            }
-            SortingType::Random => {
-                let mut rng = rand::thread_rng();
-                files
-                    .choose_multiple(&mut rng, count)
-                    .map(|i| i.1).collect()
-                    
-            }
-        }
+        Self::select(&self.rules, files)
     }
 }
 

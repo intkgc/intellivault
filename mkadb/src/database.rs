@@ -78,7 +78,7 @@ impl KeywordStore {
             .filter(|it| !it.is_empty())
             .for_each(|name| {
                 let keywords = self.files.clone();
-                println!("{}", name);
+                
                 tokio::spawn(async move {
                     let mut file = File::open(name.as_str()).unwrap();
                     let mut buffer = Vec::new();
@@ -141,12 +141,15 @@ impl KeywordStore {
             }
 
             let vec = map.get_mut(it).unwrap().clone();
-            vec.write().unwrap().push(id);
-            let vec = vec.clone();
+            
             let name = it.to_string();
 
             tokio::spawn(async move {
                 let mut vec = vec.write().unwrap();
+                if vec.binary_search(&id).is_ok() {
+                    return;
+                }
+                vec.push(id);
                 vec.sort();
                 let mut file = File::create(format!("{}.keyword", name)).unwrap();
                 let byte_slice: &[u8] = unsafe {
@@ -234,10 +237,8 @@ impl KeywordStore {
             .filter(|it| it.is_some())
             .map(|it| unsafe { it.unwrap_unchecked().clone() })
             .collect();
-        
-         let a = Matcher::new(rules, keywords).find_matches();
-         println!("{:?}", a);
-         a
+
+        Matcher::new(rules, keywords).find_matches()
     }
 
     pub fn remove_keywords(&self, id: FileID, keywords: &Vec<String>) {
