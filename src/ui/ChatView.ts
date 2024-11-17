@@ -115,6 +115,3 @@ export class ChatView extends ItemView {
 		inputArea.appendChild(sendButton);
 	}
 }
-
-
-
