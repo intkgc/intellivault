@@ -101,7 +101,7 @@ export class ChatView extends ItemView {
                 addMessage("user", userInput);
                 input.value = "";
 				input.style.height = "auto";
-                this.openaigenerator.getMsg(userInput).then(response => {
+                this.openaigenerator.getMsg(userInput, this.plugin.settings.model).then(response => {
 					addMessage("bot", response);
 				}).catch(error => {
 					console.error(error);
