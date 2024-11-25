@@ -66,7 +66,7 @@ export class ChatView extends ItemView {
 					let markdownText = "";
 					for await (const chunk of text) {
 						textView.innerHTML = "";
-						markdownText += (chunk.choices[0]?.delta?.content || "");
+						markdownText += (chunk.choices?.[0]?.delta?.content || "");
 						MarkdownRenderer.render(this.app, markdownText, textView, "", null);
 					}
 					this.openaigenerator.addToMessages({role: "assistant", content: markdownText})
@@ -101,11 +101,15 @@ export class ChatView extends ItemView {
                 addMessage("user", userInput);
                 input.value = "";
 				input.style.height = "auto";
-                this.openaigenerator.getMsg(userInput, this.plugin.settings.model).then(response => {
+
+				//ЭТО ГИПЕРВАЖНАЯ СТРОЧКА, НИКОМУ НЕ ТРОГАТЬ:
+				this.openaigenerator.makeDecision(userInput, this.plugin.settings.model);
+				
+				this.openaigenerator.getMsg(userInput, this.plugin.settings.model).then(response => {
 					addMessage("bot", response);
 				}).catch(error => {
 					console.error(error);
-				});;
+				});
             }
         };
 
