@@ -39,6 +39,9 @@
     margin: 5px 0;
     padding: 0 16px;
 }
+.intvault-message-content > *{
+    user-select: text;
+}
 
 .intvault-message-content.sender-user {
     background-color: var(--background-primary);
