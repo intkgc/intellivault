@@ -12,10 +12,10 @@ export class OpenAIGenerator {
         this.openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true});
     }
 
-    async getMsg(userMsg: string) {
+    async getMsg(userMsg: string, model: string) {
         this.addToMessages({role: "user", content: userMsg});
         const response = await this.openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: model,
             messages: this.messages,
             stream: true
         });

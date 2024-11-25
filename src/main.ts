@@ -8,10 +8,12 @@ const VIEW_TYPE_CHAT = "chat-view";
 
 interface PluginSettings {
   chatgpt_api_key: string;
+  model: string;
 }
 
 const DEFAULT_SETTINGS: Partial<PluginSettings> = {
 	chatgpt_api_key: '',
+	model: 'gpt-4o-mini'	
 };
 
 export default class ChatPlugin extends Plugin {

@@ -18,11 +18,8 @@
 }
 
 .intvault-message {
-    border-radius: 5px;
-    padding: 8px;
-    margin: 5px 0;
     display: flex;
-    align-items: flex-start;
+    align-items: baseline;
     justify-content: space-around;
     position: relative;
     overflow: hidden;
@@ -31,27 +28,43 @@
 
 .intvault-message-content  {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     width: calc(100% - 40px);
     overflow-wrap: break-word;
     word-wrap: break-word;
     word-break: break-word;
     line-height: 1.5;
+    flex-direction: column;
+    border-radius: 5px;
+    margin: 5px 0;
+    padding: 0 16px;
+}
+.intvault-message-content > *{
+    user-select: text;
 }
 
-.intvault-message.sender-user {
+.intvault-message-content.sender-user {
     background-color: var(--background-primary);
     color: var(--text-normal);
     border: 1px solid var(--background-modifier-border);
 }
-.intvault-message.sender-bot {
+.intvault-message-content.sender-bot {
     background-color: var(--background-secondary);
     color: var(--text-normal);
     border: 1px solid var(--background-modifier-border);
 }
 
+.intvault-message-icon {
+    border-radius: 50%;
+    background-color: var(--background-secondary-alt);
+    padding: 8px;
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+}
+
 .intvault-chat-input {
-    flex-grow: 1;
+    flex-grow: 1;   
     margin: 0;
     resize: none;
     height: auto;
@@ -79,7 +92,7 @@
     display: flex;
     align-items: center;
     box-shadow: none !important;
-    --icon-size: var(--icon-size-m);
+    --icon-size: var(--icon-xl);
 } 
 .intvault-send-button:not(.clickable-icon) {
     background-color: transparent; 

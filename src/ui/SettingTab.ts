@@ -26,5 +26,17 @@ export class SettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+    new Setting(containerEl)
+      .setName('Chat-GPT Model')
+      .setDesc('You can find all models here https://platform.openai.com/docs/models')
+      .addText((text) =>
+        text
+          .setPlaceholder('gpt-4o-mini for example')
+          .setValue(this.plugin.settings.model)
+          .onChange(async (value) => {
+            this.plugin.settings.model = value;
+            await this.plugin.saveSettings();
+          })
+      );
   }
 }

@@ -1,4 +1,4 @@
-import { WorkspaceLeaf, ItemView, IconName, addIcon, setIcon, Plugin } from "obsidian";
+import { WorkspaceLeaf, ItemView, IconName, addIcon, setIcon, Plugin, MarkdownRenderer } from "obsidian";
 import { compileFunction } from "vm";
 import ChatPlugin from '../main';
 import OpenAI from "openai"; 
@@ -52,24 +52,26 @@ export class ChatView extends ItemView {
 
 		const updateMessages = async (sender: string, text: APIPromise<Stream<ChatCompletionChunk>> | string) => {
 				const message = messageArea.createDiv({cls: 'intvault-message'});
-				message.addClass(sender === "user" ? "sender-user" : "sender-bot");
-				
-				
+				const iconDiv = message.createDiv({cls: 'intvault-message-icon'})
 				if(sender === "user"){
-					setIcon(message, "user-round")
+					setIcon(iconDiv, "user-round")
 				} else if (sender === "bot") {
-					setIcon(message, "bot");
+					setIcon(iconDiv, "bot");
 				}
 				
 				const textView = message.createDiv({cls: "intvault-message-content"});
-				
+				textView.addClass(sender === "user" ? "sender-user" : "sender-bot");
+
 				if(sender === "bot"){
+					let markdownText = "";
 					for await (const chunk of text) {
-						textView.setText(textView.getText() + (chunk.choices[0]?.delta?.content || ""));
+						textView.innerHTML = "";
+						markdownText += (chunk.choices[0]?.delta?.content || "");
+						MarkdownRenderer.render(this.app, markdownText, textView, "", null);
 					}
-					this.openaigenerator.addToMessages({role:"assistant", content: textView.getText()})
+					this.openaigenerator.addToMessages({role: "assistant", content: markdownText})
 				} else {
-					textView.setText(text); 
+					MarkdownRenderer.render(this.app, text, textView, "", null);
 				}
 		};
 
@@ -99,7 +101,7 @@ export class ChatView extends ItemView {
                 addMessage("user", userInput);
                 input.value = "";
 				input.style.height = "auto";
-                this.openaigenerator.getMsg(userInput).then(response => {
+                this.openaigenerator.getMsg(userInput, this.plugin.settings.model).then(response => {
 					addMessage("bot", response);
 				}).catch(error => {
 					console.error(error);
@@ -113,6 +115,3 @@ export class ChatView extends ItemView {
 		inputArea.appendChild(sendButton);
 	}
 }
-
-
-
