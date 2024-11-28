@@ -1,6 +1,8 @@
 mod database;
 mod matcher;
 mod summary;
+mod group;
+
 
 #[macro_use]
 extern crate rocket;
