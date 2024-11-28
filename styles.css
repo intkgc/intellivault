@@ -75,7 +75,7 @@
     border: none;
     box-shadow: none;
     outline: none;
-    overflow-y: auto;
+    overflow-y: hidden;
     align-self: center;
 }
 
