@@ -48,27 +48,27 @@ b6f82d11aa769a1f --> |No
 03c0bf2d7d53ba30 --> e5a6cbc4df30ca71
 76f53107dccbc61b --> 0ae8cee0a7cf4f85
 0ae8cee0a7cf4f85 <--> b6f82d11aa769a1f
-style ab7778a2d708eb0f fill:#53dfdd, stroke:#20acaa
-style 207a7feca601c2e2 fill:#a882ff, stroke:#754fcc
-style 78e957bda4884a41 fill:#e0de71, stroke:#adab3e
-style f755572270f4b40b fill:#a882ff, stroke:#754fcc
-style 223a839673882ebc fill:#e0de71, stroke:#adab3e
-style 876ae3132c378cae fill:#a882ff, stroke:#754fcc
-style c5eacc9b622b4c0a fill:#a882ff, stroke:#754fcc
-style 76f53107dccbc61b fill:#a882ff, stroke:#754fcc
-style 2e78d5081acb9130 fill:#53dfdd, stroke:#20acaa
-style 03c0bf2d7d53ba30 fill:#a882ff, stroke:#754fcc
-style 5e4aff86d5515375 fill:#e9973f, stroke:#b6640c
-style b6f82d11aa769a1f fill:#a882ff, stroke:#754fcc
-style 207a7feca601c2e2 fill:#a882ff, stroke:#754fcc
-style 78e957bda4884a41 fill:#e0de71, stroke:#adab3e
-style f755572270f4b40b fill:#a882ff, stroke:#754fcc
-style 223a839673882ebc fill:#e0de71, stroke:#adab3e
-style 876ae3132c378cae fill:#a882ff, stroke:#754fcc
-style c5eacc9b622b4c0a fill:#a882ff, stroke:#754fcc
-style 76f53107dccbc61b fill:#a882ff, stroke:#754fcc
-style e5a6cbc4df30ca71 fill:#44cf6e, stroke:#119c3b
-style 4f6683862d28ae89 fill:#fb464c, stroke:#c81319
-style e0655c30dc3992a5 fill:#fb464c, stroke:#c81319
-style 06a04622a782b489 fill:#44cf6e, stroke:#119c3b
+style ab7778a2d708eb0f fill:#2b7e7d, stroke:#004b4a
+style 207a7feca601c2e2 fill:#543e87, stroke:#210b54
+style 78e957bda4884a41 fill:#83812c, stroke:#504e00
+style f755572270f4b40b fill:#543e87, stroke:#210b54
+style 223a839673882ebc fill:#83812c, stroke:#504e00
+style 876ae3132c378cae fill:#543e87, stroke:#210b54
+style c5eacc9b622b4c0a fill:#543e87, stroke:#210b54
+style 76f53107dccbc61b fill:#543e87, stroke:#210b54
+style 2e78d5081acb9130 fill:#2b7e7d, stroke:#004b4a
+style 03c0bf2d7d53ba30 fill:#543e87, stroke:#210b54
+style 5e4aff86d5515375 fill:#9d6b35, stroke:#6a3802
+style b6f82d11aa769a1f fill:#543e87, stroke:#210b54
+style 207a7feca601c2e2 fill:#543e87, stroke:#210b54
+style 78e957bda4884a41 fill:#83812c, stroke:#504e00
+style f755572270f4b40b fill:#543e87, stroke:#210b54
+style 223a839673882ebc fill:#83812c, stroke:#504e00
+style 876ae3132c378cae fill:#543e87, stroke:#210b54
+style c5eacc9b622b4c0a fill:#543e87, stroke:#210b54
+style 76f53107dccbc61b fill:#543e87, stroke:#210b54
+style e5a6cbc4df30ca71 fill:#207038, stroke:#003d05
+style 4f6683862d28ae89 fill:#784445, stroke:#451112
+style e0655c30dc3992a5 fill:#784445, stroke:#451112
+style 06a04622a782b489 fill:#207038, stroke:#003d05
 ```
