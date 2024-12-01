@@ -10,7 +10,7 @@ c5eacc9b622b4c0a["Get notes by keywords and get summary. If not present generate
 76f53107dccbc61b["Get notes description > Ask GPT and put it in the memory."]
 
 end
-2e78d5081acb9130["> ANALYSE"]
+2e78d5081acb9130["ANALYSE"]
 03c0bf2d7d53ba30["Ask GPT what type of replay?"]
 5e4aff86d5515375["USER MESSAGE"]
 b6f82d11aa769a1f["Can answer using memory?"]
@@ -22,8 +22,8 @@ f755572270f4b40b["Which groups are related to the question? > Ask GPT."]
 876ae3132c378cae["Which keywords are related to the question? > Ask GPT."]
 c5eacc9b622b4c0a["Get notes by keywords and get summary. If not present generate it > Ask GPT."]
 76f53107dccbc61b["Get notes description > Ask GPT and put it in the memory."]
-e5a6cbc4df30ca71[">DO SPECIAL"]
-4f6683862d28ae89["> STANDARD REPLAY"]
+e5a6cbc4df30ca71["DO SPECIAL"]
+4f6683862d28ae89["STANDARD REPLAY"]
 e0655c30dc3992a5["Use chat context"]
 06a04622a782b489["do some special stuff: add new note, delete note, open note"]
 2e78d5081acb9130 --> b6f82d11aa769a1f
