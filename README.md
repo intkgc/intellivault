@@ -21,7 +21,7 @@ MKADb (aka. Multi-Keyword Associative Database, aka. Mega Keyword Awesome Databa
 
 This db is written in rust, what makes it so ⚡️ blazing fast 🚀🧬🚞🌪️
 
-# Upcoming Features
+# Upcoming Features.
 
 - [ ] Analysis Feature: We’re working on an analysis feature that will help you further process and gain insights from your notes, all powered by ChatGPT.
 - [ ] Cross-Platform Compatibility: We’re switching from SQLite to our own self-written database, making IntelliVault compatible across multiple platforms.
